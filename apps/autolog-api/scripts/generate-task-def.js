@@ -12,6 +12,7 @@ const taskDef = {
   requiresCompatibilities: ["FARGATE"],
   cpu: "256",
   memory: "512",
+  executionRoleArn: "arn:aws:iam::030537970892:role/yangtologTaskRole",
   containerDefinitions: [
     {
       name: "yangtolog-api",
