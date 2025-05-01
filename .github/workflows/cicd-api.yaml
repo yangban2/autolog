@@ -41,6 +41,8 @@ jobs:
 
       - name: Generate ECS task definition
         run: |
+          pwd
+          ls
           node scripts/generate-task-def.js $IMAGE_URI
 
       - name: Register ECS task definition
