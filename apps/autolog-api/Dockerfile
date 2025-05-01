@@ -8,8 +8,7 @@ WORKDIR /app
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 
 # 설치 전에 모든 패키지 복사 필요
-COPY apps ./apps
-COPY packages ./packages
+COPY . .
 
 RUN pnpm install --frozen-lockfile
 
