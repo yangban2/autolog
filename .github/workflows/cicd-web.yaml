@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-22
     defaults:
       run:
-        working-directory: apps/web
+        working-directory: apps/autolog-web
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

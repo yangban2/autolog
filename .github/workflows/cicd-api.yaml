@@ -13,15 +13,15 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/api
+    #defaults:
+    #  run:
+    # working-directory: apps/autolog-api
 
     steps:
       - uses: actions/checkout@v3
 
       - name: Configure AWS
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -36,7 +36,7 @@ jobs:
         run: |
           IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
-          docker build -t $IMAGE_URI .
+          docker build -t $IMAGE_URI -f apps/autolog-api/Dockerfile .
           docker push $IMAGE_URI
 
       - name: Generate ECS task definition

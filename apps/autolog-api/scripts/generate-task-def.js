@@ -7,14 +7,14 @@ if (!imageUri) {
 }
 
 const taskDef = {
-  family: "photo-blog-api-task",
+  family: "yangtolog-task",
   networkMode: "awsvpc",
   requiresCompatibilities: ["FARGATE"],
   cpu: "256",
   memory: "512",
   containerDefinitions: [
     {
-      name: "photo-blog-api",
+      name: "yangtolog-api",
       image: imageUri,
       portMappings: [
         {
