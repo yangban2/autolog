@@ -43,7 +43,7 @@ jobs:
         run: |
           pwd
           ls
-          node scripts/generate-task-def.js $IMAGE_URI
+          node apps/autolog-api/scripts/generate-task-def.js $IMAGE_URI
 
       - name: Register ECS task definition
         id: register-task
