@@ -21,7 +21,8 @@ WORKDIR /app
 
 # First install dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .
-RUN npm install
+RUN corepack enable && corepack prepare pnpm@10 --activate
+RUN pnpm install
 
 # Build the project and its dependencies
 COPY --from=builder /app/out/full/ .
@@ -33,7 +34,7 @@ COPY --from=builder /app/out/full/ .
 # ARG TURBO_TOKEN
 # ENV TURBO_TOKEN=$TURBO_TOKEN
 
-RUN npm run turbo build
+RUN pnpm turbo build
 
 FROM base AS runner
 WORKDIR /app
