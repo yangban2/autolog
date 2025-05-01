@@ -18,7 +18,7 @@ importers:
         specifier: 5.8.2
         version: 5.8.2
 
-  apps/api:
+  apps/autolog-api:
     dependencies:
       cors:
         specifier: ^2.8.5
@@ -52,7 +52,7 @@ importers:
         specifier: ^5.8.3
         version: 5.8.3
 
-  apps/web:
+  apps/autolog-web:
     devDependencies:
       typescript:
         specifier: ^5.8.3
