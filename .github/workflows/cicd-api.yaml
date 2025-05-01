@@ -13,9 +13,9 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    #defaults:
-    #  run:
-    # working-directory: apps/autolog-api
+    defaults:
+      run:
+        working-directory: apps/autolog-api
 
     steps:
       - uses: actions/checkout@v3
@@ -36,14 +36,14 @@ jobs:
         run: |
           IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
-          docker build -t $IMAGE_URI -f apps/autolog-api/Dockerfile .
+          docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
 
       - name: Generate ECS task definition
         run: |
           pwd
           ls
-          node apps/autolog-api/scripts/generate-task-def.js $IMAGE_URI
+          node scripts/generate-task-def.js $IMAGE_URI
 
       - name: Register ECS task definition
         id: register-task
