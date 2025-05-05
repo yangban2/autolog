@@ -9,3 +9,5 @@ export const ENV = {
   AWS_REGION: process.env.AWS_REGION || "",
   AWS_S3_BUCKET_NAME: process.env.AWS_S3_BUCKET_NAME || "",
 }
+
+console.log(ENV.AWS_REGION)
