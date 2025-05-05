@@ -29,6 +29,6 @@ app.post("/upload", upload.array("photos"), (req: Request, res: Response) => {
   res.json(results)
 })
 
-app.listen(3001, () => {
-  console.log("🚀 API 서버 실행 중: http://localhost:3001")
+app.listen(3000, () => {
+  console.log("🚀 API 서버 실행 중: http://localhost:3000")
 })
