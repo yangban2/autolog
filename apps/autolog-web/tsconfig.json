@@ -1,10 +1,20 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "strict": true,
-    "outDir": "dist",
-    "esModuleInterop": true
-  }
+    "target": "ESNext", // 최신 JavaScript 기능 사용
+    "useDefineForClassFields": true, // React에서 클래스 필드 사용 시 권장
+    "lib": ["DOM", "DOM.Iterable", "ESNext"], // 브라우저 환경 및 최신 ES 기능
+    "allowJs": false, // JavaScript 파일 허용 여부
+    "skipLibCheck": true, // 라이브러리 타입 검사 건너뜀
+    "esModuleInterop": true, // CommonJS와 ES 모듈 간 호환성
+    "module": "ESNext", // ES 모듈 사용
+    "moduleResolution": "node", // Node.js 스타일 모듈 해석
+    "resolveJsonModule": true, // JSON 파일 import 허용
+    "isolatedModules": true, // 각 파일을 독립적으로 처리
+    "strict": true, // 엄격한 타입 검사
+    "noEmit": true, // 컴파일 결과물을 생성하지 않음 (Vite가 처리)
+    "jsx": "react-jsx", // React 17+의 새로운 JSX 변환 사용
+    "types": ["vite/client"] // Vite 환경에서의 타입 지원
+  },
+  "include": ["src"], // 소스 코드 디렉토리
+  "exclude": ["node_modules", "dist"] // 제외 디렉토리
 }
