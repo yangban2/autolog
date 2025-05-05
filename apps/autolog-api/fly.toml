@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for autolog-api-icy-rain-1949 on 2025-05-05T22:47:32+09:00
+# fly.toml app configuration file generated for autolog-api on 2025-05-05T23:02:58+09:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'autolog-api-icy-rain-1949'
+app = 'autolog-api'
 primary_region = 'nrt'
 
 [build]
