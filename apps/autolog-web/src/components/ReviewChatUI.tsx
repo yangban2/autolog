@@ -1,4 +1,5 @@
-import React, { useState } from "react"
+// GPT-style ReviewChatUI – 멀티턴 Vision 기반
+import React, { useRef, useState, useEffect } from "react"
 import { callGptApi } from "../apis/gpt"
 
 interface ImageWithMeta {
@@ -18,6 +19,11 @@ const ReviewChatUI: React.FC = () => {
   const [images, setImages] = useState<ImageWithMeta[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [started, setStarted] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [chatLog])
 
   const handleImageUpload = (files: FileList | null) => {
     if (!files) return
@@ -39,23 +45,21 @@ const ReviewChatUI: React.FC = () => {
 
     setIsLoading(true)
 
+    const newChatLog: Message[] = [
+      {
+        role: "user",
+        content: input,
+        images,
+      },
+    ]
+
     const formData = new FormData()
+    formData.append("chatLog", JSON.stringify(newChatLog))
     images.forEach((img) => formData.append("images", img.file))
-    formData.append("prompt", input)
 
     try {
       const html = await callGptApi(formData)
-      setChatLog([
-        {
-          role: "user",
-          content: input,
-          images,
-        },
-        {
-          role: "gpt",
-          content: html,
-        },
-      ])
+      setChatLog([...newChatLog, { role: "gpt", content: html }])
       setStarted(true)
       setInput("")
       setImages([])
@@ -70,20 +74,17 @@ const ReviewChatUI: React.FC = () => {
     if (!input.trim()) return
 
     const userMessage: Message = { role: "user", content: input }
-    setChatLog((prev) => [...prev, userMessage])
+    const updatedLog = [...chatLog, userMessage]
+    setChatLog(updatedLog)
     setInput("")
     setIsLoading(true)
 
     const formData = new FormData()
-    formData.append("prompt", input)
+    formData.append("chatLog", JSON.stringify(updatedLog))
 
     try {
       const html = await callGptApi(formData)
-      const gptMessage: Message = {
-        role: "gpt",
-        content: html,
-      }
-      setChatLog((prev) => [...prev, gptMessage])
+      setChatLog([...updatedLog, { role: "gpt", content: html }])
     } catch (err) {
       alert("리뷰 생성에 실패했습니다.")
     } finally {
@@ -142,21 +143,17 @@ const ReviewChatUI: React.FC = () => {
           id="file-input"
           onChange={(e) => handleImageUpload(e.target.files)}
         />
-        <div className="flex w-[50vw] cursor-text flex-col items-center justify-center rounded-[28px] bg-clip-padding contain-inline-size overflow-clip border-[#0d0d0d1a] border shadow-sm sm:shadow-lg dark:shadow-none! bg-token-bg-primary dark:bg-[#303030]">
-          <div className="relative flex w-full items-end p-3">
-            <textarea
-              className="w-full border p-2 rounded min-h-[100px] border-none outline-none resize-none"
-              placeholder="작성에 참고할 프롬프트를 입력하세요"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-            />
-          </div>
-        </div>
+
+        <textarea
+          className="w-[50vw] border p-2 rounded min-h-[100px]"
+          placeholder="작성에 참고할 프롬프트를 입력하세요"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+
         <button
           disabled={images.length === 0 || input.trim() === "" || isLoading}
-          className={`bg-blue-600 text-white px-6 py-2 rounded ${
-            isLoading ? "animate-pulse" : ""
-          } disabled:opacity-50`}
+          className={`bg-blue-600 text-white px-6 py-2 rounded ${isLoading ? "animate-pulse" : ""} disabled:opacity-50`}
           onClick={handleGenerateStart}
         >
           {isLoading ? "..." : "시작하기"}
@@ -173,7 +170,7 @@ const ReviewChatUI: React.FC = () => {
             key={idx}
             className={`p-3 rounded ${msg.role === "user" ? "bg-blue-100 self-end" : "bg-white self-start border"}`}
           >
-            {Array.isArray(msg.images) && msg.images.length > 0 && (
+            {msg.images && (
               <div className="flex flex-wrap gap-2 mb-2">
                 {msg.images.map((img, i) => (
                   <img
@@ -193,6 +190,7 @@ const ReviewChatUI: React.FC = () => {
             GPT가 작성 중입니다...
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       <div className="border-t p-4 space-y-2 bg-white">
@@ -207,9 +205,7 @@ const ReviewChatUI: React.FC = () => {
           <button
             onClick={handleSend}
             disabled={isLoading}
-            className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-60 ${
-              isLoading ? "animate-pulse" : ""
-            }`}
+            className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-60 ${isLoading ? "animate-pulse" : ""}`}
           >
             {isLoading ? "..." : "입력"}
           </button>
