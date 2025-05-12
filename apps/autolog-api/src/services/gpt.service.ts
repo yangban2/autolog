@@ -1,6 +1,7 @@
 import { OpenAI } from "openai"
 import { ENV } from "../config/env"
 import { INSTRUCTIONS } from "../constants"
+import { ChatCompletionMessageParam } from "openai/resources/chat"
 
 const openai = new OpenAI({ apiKey: ENV.OPENAI_API_KEY })
 
@@ -21,21 +22,19 @@ export const generateHtmlReview = async (prompt: string): Promise<string> => {
   return completion.output_text ?? ""
 }
 
-export const generateHtmlReviewWithUrls = async (
-  prompt: string,
-  urls: string[]
-) => {
-  const content = [
-    { type: "text", text: prompt },
-    ...urls.map((url) => ({
-      type: "image_url",
-      image_url: { url },
-    })),
-  ]
+type ContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } }
 
+export async function generateHtmlReviewWithContext(
+  messages: {
+    role: string
+    content: ContentPart[]
+  }[]
+) {
   const res = await openai.chat.completions.create({
-    model: "gpt-4o", // Vision 모델
-    messages: [{ role: "user", content: JSON.stringify(content) }],
+    model: "gpt-4o",
+    messages: messages as ChatCompletionMessageParam[],
     temperature: 0.7,
     max_tokens: 1500,
   })

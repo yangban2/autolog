@@ -1,29 +1,30 @@
+// /review API — Vision 모델 컨텍스트 유지 & 한국어 응답 보장
 import { Router } from "express"
 import fs from "fs"
 import multer from "multer"
 
-import { generateHtmlReviewWithUrls } from "../services/gpt.service"
+import { generateHtmlReviewWithContext } from "../services/gpt.service"
 import { uploadFileToS3 } from "../services/s3.service"
+import { ChatCompletionMessageParam } from "openai/resources/chat"
 
 const router = Router()
 const upload = multer({ dest: "uploads/" })
 
+// chatLog 전체를 받아서 vision context를 유지하도록 함
 router.post("/review", upload.array("images"), async (req, res) => {
   try {
-    const { prompt } = req.body
+    const { chatLog } = req.body
     const files = req.files as Express.Multer.File[]
 
-    if (!prompt) {
-      res.status(400).json({ error: "프롬프트가 필요합니다." })
+    if (!chatLog) {
+      res.status(400).json({ error: "chatLog가 필요합니다." })
     }
 
-    // const base64Images = await Promise.all(
-    //   files.map(async (file) => {
-    //     const buffer = fs.readFileSync(file.path)
-    //     fs.unlinkSync(file.path)
-    //     return `data:image/${file.mimetype.split("/")[1]};base64,${buffer.toString("base64")}`
-    //   })
-    // )
+    const parsedLog = JSON.parse(chatLog) as {
+      role: "user" | "gpt"
+      content: string
+      images?: string[] // base64 encoded previews from frontend (if needed), or ignore
+    }[]
 
     const imageUrls: string[] = []
     for (const file of files) {
@@ -34,7 +35,29 @@ router.post("/review", upload.array("images"), async (req, res) => {
     // 임시 파일 삭제
     files.forEach((file) => fs.unlinkSync(file.path))
 
-    const html = await generateHtmlReviewWithUrls(prompt, imageUrls)
+    // 첫 메시지에만 이미지가 있으므로 그것만 합성
+    const messages = parsedLog.map((msg, idx) => {
+      const isFirstUserWithImages =
+        msg.role === "user" && idx === 0 && imageUrls.length > 0
+
+      const content: ChatCompletionMessageParam["content"] =
+        isFirstUserWithImages
+          ? [
+              { type: "text", text: `${msg.content} (한국어로 써줘)` },
+              ...imageUrls.map((url) => ({
+                type: "image_url" as const,
+                image_url: { url },
+              })),
+            ]
+          : [{ type: "text", text: msg.content }]
+
+      return {
+        role: msg.role === "gpt" ? "assistant" : msg.role,
+        content,
+      }
+    })
+
+    const html = await generateHtmlReviewWithContext(messages as any)
     res.json({ html })
   } catch (err) {
     console.error(err)
