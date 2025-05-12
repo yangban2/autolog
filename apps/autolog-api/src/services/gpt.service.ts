@@ -21,20 +21,20 @@ export const generateHtmlReview = async (prompt: string): Promise<string> => {
   return completion.output_text ?? ""
 }
 
-export const generateHtmlReviewWithImages = async (
+export const generateHtmlReviewWithUrls = async (
   prompt: string,
-  base64Images: string[]
+  urls: string[]
 ) => {
   const content = [
     { type: "text", text: prompt },
-    ...base64Images.map((data) => ({
+    ...urls.map((url) => ({
       type: "image_url",
-      image_url: { url: data }, // base64 data URL
+      image_url: { url },
     })),
   ]
 
   const res = await openai.chat.completions.create({
-    model: "gpt-4o", // 반드시 vision 지원 모델
+    model: "gpt-4o", // Vision 모델
     messages: [{ role: "user", content: JSON.stringify(content) }],
     temperature: 0.7,
     max_tokens: 1500,

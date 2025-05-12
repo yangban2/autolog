@@ -2,7 +2,8 @@ import { Router } from "express"
 import fs from "fs"
 import multer from "multer"
 
-import { generateHtmlReviewWithImages } from "../services/gpt.service"
+import { generateHtmlReviewWithUrls } from "../services/gpt.service"
+import { uploadFileToS3 } from "../services/s3.service"
 
 const router = Router()
 const upload = multer({ dest: "uploads/" })
@@ -16,29 +17,24 @@ router.post("/review", upload.array("images"), async (req, res) => {
       res.status(400).json({ error: "프롬프트가 필요합니다." })
     }
 
-    const base64Images = await Promise.all(
-      files.map(async (file) => {
-        const buffer = fs.readFileSync(file.path)
-        fs.unlinkSync(file.path)
-        return `data:image/${file.mimetype.split("/")[1]};base64,${buffer.toString("base64")}`
-      })
-    )
+    // const base64Images = await Promise.all(
+    //   files.map(async (file) => {
+    //     const buffer = fs.readFileSync(file.path)
+    //     fs.unlinkSync(file.path)
+    //     return `data:image/${file.mimetype.split("/")[1]};base64,${buffer.toString("base64")}`
+    //   })
+    // )
 
-    // const imageUrls: string[] = []
-    // for (const file of files) {
-    //   const url = await uploadFileToS3(file.path, file.originalname)
-    //   imageUrls.push(url)
-    // }
+    const imageUrls: string[] = []
+    for (const file of files) {
+      const url = await uploadFileToS3(file.path, file.originalname)
+      imageUrls.push(url)
+    }
 
-    // // 임시 파일 삭제
-    // files.forEach((file) => fs.unlinkSync(file.path))
+    // 임시 파일 삭제
+    files.forEach((file) => fs.unlinkSync(file.path))
 
-    // // 사용자 프롬프트에 이미지 정보 붙이기 (옵션)
-    // const imageMarkdown = imageUrls
-    //   .map((url, i) => `![이미지 ${i + 1}](${url})`)
-    //   .join("\n")
-
-    const html = await generateHtmlReviewWithImages(prompt, base64Images)
+    const html = await generateHtmlReviewWithUrls(prompt, imageUrls)
     res.json({ html })
   } catch (err) {
     console.error(err)
