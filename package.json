@@ -1,5 +1,6 @@
 {
-  "name": "autolog",
+  "name": "yangban2",
+  "description": "yangban2 monorepo",
   "private": true,
   "scripts": {
     "build": "turbo run build",
