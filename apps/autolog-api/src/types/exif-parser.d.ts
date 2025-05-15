@@ -1,3 +1,4 @@
+// exif-parser는 d.ts 가 없어 대강 작성함
 declare module "exif-parser" {
   interface ExifTags {
     [key: string]: any

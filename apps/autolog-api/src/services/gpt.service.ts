@@ -32,6 +32,8 @@ export async function generateHtmlReviewWithContext(
     content: ContentPart[]
   }[]
 ) {
+  console.info(messages)
+
   const res = await openai.chat.completions.create({
     model: "gpt-4o",
     messages: messages as ChatCompletionMessageParam[],

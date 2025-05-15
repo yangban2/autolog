@@ -1,4 +1,3 @@
-// /review API — Vision 모델 컨텍스트 유지 & 한국어 응답 보장
 import { Router } from "express"
 import fs from "fs"
 import multer from "multer"
@@ -10,7 +9,6 @@ import { ChatCompletionMessageParam } from "openai/resources/chat"
 const router = Router()
 const upload = multer({ dest: "uploads/" })
 
-// chatLog 전체를 받아서 vision context를 유지하도록 함
 router.post("/review", upload.array("images"), async (req, res) => {
   try {
     const { chatLog } = req.body
@@ -23,7 +21,7 @@ router.post("/review", upload.array("images"), async (req, res) => {
     const parsedLog = JSON.parse(chatLog) as {
       role: "user" | "gpt"
       content: string
-      images?: string[] // base64 encoded previews from frontend (if needed), or ignore
+      images?: string[]
     }[]
 
     const imageUrls: string[] = []
@@ -35,7 +33,6 @@ router.post("/review", upload.array("images"), async (req, res) => {
     // 임시 파일 삭제
     files.forEach((file) => fs.unlinkSync(file.path))
 
-    // 첫 메시지에만 이미지가 있으므로 그것만 합성
     const messages = parsedLog.map((msg, idx) => {
       const isFirstUserWithImages =
         msg.role === "user" && idx === 0 && imageUrls.length > 0

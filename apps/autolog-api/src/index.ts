@@ -4,13 +4,14 @@ import multer from "multer"
 import fs from "fs"
 import exif from "exif-parser"
 import reviewRoute from "./routes/review"
+import testRoute from "./routes/test"
 
 const app = express()
 const upload = multer({ dest: "uploads/" })
 
 app.use(cors())
 app.use(express.json())
-app.use("/api", reviewRoute)
+app.use("/api", [reviewRoute, testRoute])
 
 app.post("/upload", upload.array("photos"), (req: Request, res: Response) => {
   if (!req.files || !(req.files instanceof Array)) {
